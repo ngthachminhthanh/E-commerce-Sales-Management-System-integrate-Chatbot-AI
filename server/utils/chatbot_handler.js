@@ -10,7 +10,7 @@ async function findProduct(parameters) {
     
     if (products.length > 0) {
         const productList = products.map(p => p.name).join(', ');
-        return `Tôi đã tìm thấy ${products.length} sản phẩm phù hợp với "${productName}": ${productList}. Bạn muốn biết thêm thông tin gì về các sản phẩm này?`;
+        return `Tôi đã tìm thấy ${products.length} sản phẩm phù hợp với yêu cầu của bạn, đó là: ${productList}. Bạn muốn biết thêm thông tin gì về các sản phẩm này?`;
     } else {
         return `Xin lỗi, tôi không tìm thấy sản phẩm nào phù hợp với "${productName}".`;
     }

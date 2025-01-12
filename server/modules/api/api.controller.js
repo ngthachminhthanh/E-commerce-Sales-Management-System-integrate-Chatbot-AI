@@ -327,22 +327,22 @@ const sessionClient = new dialogflow.SessionsClient({
 });
 
 async function handleIntent(result) {
-    const intent = result.intent.displayName;
+    const action = result.action;
     const parameters = result.parameters.fields;
 
     if (!parameters || Object.keys(parameters).length === 0) {
         return "Xin lỗi, tôi không hiểu yêu cầu của bạn. Bạn có thể cung cấp thêm thông tin không?";
     }
 
-    switch(intent) {
-        case 'TimSanPham':
+    switch(action) {
+        case 'findProduct':
             return await findProduct(parameters);
-        case 'XemGia':
+        case 'getPrice':
             return await getPrice(parameters);
-        case 'KiemTraTonKho':
+        case 'checkStock':
             return await checkStock(parameters);
         default:
-            return result.fulfillmentText || "Xin lỗi, tôi không hiểu yêu cầu của bạn.";
+            return result.fulfillmentText || "Xin lỗi, tôi không hiểu yêu cầu của bạn. Bạn có thể cung cấp thêm thông tin không?";
     }
 }
 
@@ -366,18 +366,18 @@ exports.textQuery = async (req, res) => {
         };
 
         const responses = await sessionClient.detectIntent(request);
-        console.log('responses: ', responses);
+        console.log('All responses from Dialogflow: ', responses);
+
         const result = responses[0].queryResult;
-        console.log(result);
-        console.log(`Query: ${result.queryText}`);
+        console.log('Result: ', result);
+        console.log(`Query text: ${result.queryText}`);
         console.log(`Response: ${result.fulfillmentText}`);
+        console.log(`Extracted parameters:`, result.parameters.fields);
+        console.log(`Triggered Action: ${result.action}`);        
 
         // Xử lý intent và tương tác với MongoDB
         let responseText = await handleIntent(result);
-        // res.json({fulfillmentText: responseText});
         res.json({...result, fulfillmentText: responseText});
-
-        // res.json(result);
     } catch (error) {
         console.error('Lỗi trong text query:', error);
         res.status(500).json({ error: 'Có lỗi gì đó đã xảy ra với text query' });
@@ -408,11 +408,9 @@ exports.eventQuery = async (req, res) => {
         console.log(`Query: ${result.queryText}`);
         console.log(`Response: ${result.fulfillmentText}`);
 
-        // Xử lý intent và tương tác với MongoDB cho event query
+        // Xử lý intent và tương tác với MongoDB
         let responseText = await handleIntent(result);
         res.json({...result, fulfillmentText: responseText});
-
-        // res.json(result);
     } catch (error) {
         console.error('Lỗi trong event query:', error);
         res.status(500).json({ error: 'Có lỗi gì đó đã xảy ra với event query' });

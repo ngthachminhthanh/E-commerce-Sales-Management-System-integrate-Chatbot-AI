@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { RobotOutlined, CloseOutlined } from '@ant-design/icons';
 import Card from "./sections/Card";
-import "../../assets/customCSS/RippleEffect.css"
+import "../../assets/customCSS/RippleEffect.css";
 
 function ChatBot() {
     const [messages, setMessages] = useState([]);
@@ -10,7 +10,7 @@ function ChatBot() {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        const storedMessages = localStorage.getItem('chatMessages');
+        const storedMessages = sessionStorage.getItem('chatMessages');
         if (storedMessages) {
             setMessages(JSON.parse(storedMessages));
         } else {
@@ -32,10 +32,21 @@ function ChatBot() {
 
         try {
             const response = await axios.post('http://localhost:5000/api/dialogflow/textQuery', { text });
-            const botMessages = response.data.fulfillmentMessages.map(content => ({
-                who: 'bot',
-                content: content
-            }));
+            let botMessages = {};
+            if (response.data.fulfillmentMessages.length > 0) {
+                botMessages = response.data.fulfillmentMessages.map(content => ({
+                    who: 'bot',
+                    content: content
+                }));
+            } else {
+                botMessages = [
+                    {
+                        who: 'bot',
+                        content: { text: { text: [response.data.fulfillmentText] } }
+                    }
+                ];
+            }
+
             setMessages(prevMessages => [...prevMessages, ...botMessages]);
         } catch (error) {
             const errorMessage = {
@@ -121,7 +132,7 @@ function ChatBot() {
                     <div className="p-4 border-t">
                         <input
                             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Send a message..."
+                            placeholder="Gửi một tin nhắn..."
                             onKeyDown={handleKeyPress}
                             type="text"
                         />
